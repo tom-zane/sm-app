@@ -6,6 +6,9 @@ import { useAccounts } from '../../context/AccountsContext';
 import { useTheme } from '../../context/ThemeContext';
 import * as Haptics from 'expo-haptics';
 
+// 1. IMPORT THE SINGLE SOURCE OF TRUTH
+import { fetchMeterData } from '../../utils/api';
+
 const AddAccountModal = ({ visible, onClose }) => {
   const { addAccount } = useAccounts();
   const { colors, themeColor } = useTheme();
@@ -32,11 +35,11 @@ const AddAccountModal = ({ visible, onClose }) => {
     }
 
     try {
-      const response = await fetch(`https://cors-proxy-jkpdd-smartmeter.aryanue195035ece.workers.dev/?consumerCode=${customerId}`);
-      const data = await response.json();
+      // 2. USE THE API FUNCTION (This checks validity AND pre-warms the cache!)
+      const data = await fetchMeterData(customerId, true);
 
       if (!data.isCustomerIdValid) {
-        throw new Error(data.error || "Invalid Customer ID.");
+        throw new Error("Invalid Customer ID.");
       }
 
       const success = await addAccount(customerId, customerName);
@@ -49,6 +52,7 @@ const AddAccountModal = ({ visible, onClose }) => {
       setCustomerId("");
       onClose();
     } catch (err) {
+      // api.js throws clean error messages directly from your Cloudflare worker
       setError(err.message || "An error occurred.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {

@@ -19,21 +19,27 @@ export const fetchMeterData = async (accountNumber, forceRefresh = false) => {
       if (cachedData && cachedTimestamp) {
         const isCacheValid = (Date.now() - parseInt(cachedTimestamp, 10)) < CACHE_DURATION;
         if (isCacheValid) {
-          console.log("[API] Returning cached data for", accountNumber);
           return cachedData;
         }
       }
     }
 
-    // 2. Fetch Fresh Data from the new /getcustomerinfo route
-    console.log("[API] Fetching fresh data for", accountNumber);
     const response = await fetch(`${API_BASE_URL}/getcustomerinfo?consumerCode=${accountNumber}`);
-    
+    const responseText = await response.text();
+
     // Parse the JSON immediately so we can inspect its contents even on non-200 statuses
-    const data = await response.json();
+    let data;
+    try {j
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error("[API] JSON parse error:", parseError);
+      console.error("[API] Failed to parse response as JSON. Response was:", responseText);
+      throw new Error(`JSON Parse Error: ${parseError.message}. Response: ${responseText}`);
+    }
     
     if (!response.ok) {
       // Pulls the explicit error message parsed by the worker (e.g., "Your CustomerID is Wrong...")
+      console.error("[API] Response not ok, error:", data.error);
       throw new Error(data.error || "Failed to fetch data from the server.");
     }
     
@@ -43,7 +49,9 @@ export const fetchMeterData = async (accountNumber, forceRefresh = false) => {
 
     return data;
   } catch (error) {
-    console.error("[API Error]:", error);
+    console.error("[API Error] Full error object:", error);
+    console.error("[API Error] Error message:", error.message);
+    console.error("[API Error] Error stack:", error.stack);
     throw error;
   }
 };
