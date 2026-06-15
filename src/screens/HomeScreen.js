@@ -17,7 +17,7 @@ import { SPACING } from '../styles/theme';
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { currentlySelectedAccount, accounts } = useAccounts();
-  const { themeColor, colors } = useTheme(); 
+  const { colors } = useTheme(); // Removed independent themeColor state
   
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -93,7 +93,7 @@ const HomeScreen = () => {
         <AlertCircle color={colors.textSecondary} size={48} style={{ marginBottom: SPACING.md }} />
         <Text style={[styles.emptyText, { color: colors.text }]}>No Account Selected</Text>
         <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>Add an account to view your smart meter data.</Text>
-        <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: themeColor }]} onPress={() => navigation.navigate('Accounts')}>
+        <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]} onPress={() => navigation.navigate('Accounts')}>
           <Text style={styles.primaryBtnText}>Go to Accounts</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -113,7 +113,7 @@ const HomeScreen = () => {
       >
         <Text style={[styles.tableCellText, { color: colors.text, flex: 2 }]}>{formatDate(item.fullDate)}</Text>
         <Text style={[styles.tableCellText, { color: colors.text, flex: 1.5 }]}>{item.units}</Text>
-        <Text style={[styles.tableCellText, styles.consumptionText, { flex: 1.5, textAlign: 'right' }]}>
+        <Text style={[styles.tableCellText, styles.consumptionText, { color: colors.primary, flex: 1.5, textAlign: 'right' }]}>
           +{item.dailyConsumption !== null ? item.dailyConsumption : "N/A"}
         </Text>
       </TouchableOpacity>
@@ -122,7 +122,6 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      
       <View>
         {/* Header Card */}
         <View style={[styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -131,11 +130,11 @@ const HomeScreen = () => {
             <Text style={[styles.accountNumber, { color: colors.textSecondary }]}>{currentlySelectedAccount?.accountNumber}</Text>
             
             <TouchableOpacity 
-              style={[styles.payBillInlineBtn, { backgroundColor: `${themeColor}15`, borderColor: `${themeColor}30` }]} 
+              style={[styles.payBillInlineBtn, { backgroundColor: `${colors.primary}15`, borderColor: `${colors.primary}30` }]} 
               onPress={handlePayBill}
             >
-              <Text style={[styles.payBillInlineText, { color: themeColor }]}>Pay Bill Online</Text>
-              <ExternalLink color={themeColor} size={14} />
+              <Text style={[styles.payBillInlineText, { color: colors.primary }]}>Pay Bill Online</Text>
+              <ExternalLink color={colors.primary} size={14} />
             </TouchableOpacity>
           </View>
           <TouchableOpacity 
@@ -144,9 +143,9 @@ const HomeScreen = () => {
             disabled={loading || refreshing}
           >
             {loading || refreshing ? (
-              <ActivityIndicator color={themeColor} size="small" />
+              <ActivityIndicator color={colors.primary} size="small" />
             ) : (
-              <RefreshCw color={themeColor} size={20} />
+              <RefreshCw color={colors.primary} size={20} />
             )}
           </TouchableOpacity>
         </View>
@@ -161,7 +160,7 @@ const HomeScreen = () => {
               {data.monthlyUsage.map((usage, index) => (
                 <View key={index} style={[styles.monthlyCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <Text style={[styles.monthText, { color: colors.text }]}>{usage.month}</Text>
-                  <Text style={styles.billText}>₹{usage.estimatedBill?.toFixed(0) || 0}</Text>
+                  <Text style={[styles.billText, { color: colors.primary }]}>₹{usage.estimatedBill?.toFixed(0) || 0}</Text>
                   <Text style={[styles.unitsText, { color: colors.textSecondary }]}>Units: {usage.unitsConsumed}</Text>
                 </View>
               ))}
@@ -172,14 +171,14 @@ const HomeScreen = () => {
 
       {/* Daily List */}
       {loading && !data && !refreshing ? (
-        <ActivityIndicator color={themeColor} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : (
         data?.readings && data.readings.length > 0 && (
           <View style={[styles.dailyUsageContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.dailyUsageTitleRow}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Daily Usage</Text>
               <View style={[styles.visibleMonthBadge, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                <Text style={[styles.visibleMonthText, { color: themeColor }]}>{visibleMonth}</Text>
+                <Text style={[styles.visibleMonthText, { color: colors.primary }]}>{visibleMonth}</Text>
               </View>
             </View>
             
@@ -198,8 +197,8 @@ const HomeScreen = () => {
               showsVerticalScrollIndicator={false}
               style={{ flex: 1 }}
               contentContainerStyle={{ paddingBottom: SPACING.xl }}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={() => loadData(true)} tintColor={themeColor} />
+              refreshControl = {
+                <RefreshControl refreshing={refreshing} onRefresh={() => loadData(true)} tintColor={colors.primary} />
               }
             />
           </View>
@@ -236,8 +235,7 @@ const styles = StyleSheet.create({
   monthlyScroll: { paddingRight: SPACING.md, gap: SPACING.sm, marginTop: SPACING.md },
   monthlyCard: { padding: SPACING.sm, borderRadius: 10, borderWidth: 1, minWidth: 90, alignItems: 'center' },
   monthText: { fontSize: 13, fontWeight: '600', marginBottom: 2 },
-  billText: { color: '#00D084', fontSize: 16, fontWeight: 'bold', marginBottom: 2 },
-  unitsText: { fontSize: 11 },
+  billText: { fontSize: 16, fontWeight: 'bold', marginBottom: 2 },
 
   dailyUsageContainer: { flex: 1, marginHorizontal: SPACING.md, marginBottom: SPACING.md, borderRadius: 16, borderWidth: 1, overflow: 'hidden' },
   dailyUsageTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: SPACING.md },
@@ -248,7 +246,7 @@ const styles = StyleSheet.create({
   tableHeaderText: { fontSize: 14, fontWeight: '600', paddingHorizontal: SPACING.sm },
   tableRow: { flexDirection: 'row', padding: SPACING.md },
   tableCellText: { fontSize: 15, fontWeight: '500' },
-  consumptionText: { color: '#00D084', fontWeight: 'bold' },
+  consumptionText: { fontWeight: 'bold' },
 });
 
 export default HomeScreen;

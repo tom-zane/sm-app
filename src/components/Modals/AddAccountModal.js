@@ -9,7 +9,7 @@ import { fetchMeterData } from '../../utils/api';
 
 const AddAccountModal = ({ visible, onClose }) => {
   const { addAccount } = useAccounts();
-  const { colors, themeColor } = useTheme();
+  const { colors } = useTheme(); // Relying completely on structured colors
   
   const [customerName, setCustomerName] = useState("");
   const [customerId, setCustomerId] = useState("");
@@ -49,7 +49,6 @@ const AddAccountModal = ({ visible, onClose }) => {
       setCustomerId("");
       onClose();
     } catch (err) {
-      // Displays clean message strings from the worker context rather than a data object dump
       setError(err.message || "Unable to communicate with verification servers.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -97,15 +96,23 @@ const AddAccountModal = ({ visible, onClose }) => {
             onChangeText={setCustomerId}
           />
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {error ? <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text> : null}
 
           <View style={styles.footer}>
             <TouchableOpacity onPress={onClose} style={[styles.cancelBtn, { borderColor: colors.border, backgroundColor: colors.background }]} disabled={loading}>
               <Text style={[styles.cancelText, { color: colors.textSecondary }]}>Cancel</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity onPress={handleLogin} style={[styles.submitBtn, { backgroundColor: themeColor }]} disabled={loading}>
-              {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.submitText}>Submit</Text>}
+            <TouchableOpacity 
+              onPress={handleLogin} 
+              style={[styles.submitBtn, { backgroundColor: colors.primary }]} 
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={colors.background} />
+              ) : (
+                <Text style={[styles.submitText, { color: colors.background }]}>Submit</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -127,12 +134,12 @@ const styles = StyleSheet.create({
   findBtnText: { color: '#FFF', fontSize: 12, fontWeight: 'bold' },
   label: { fontSize: 13, marginBottom: 8, fontWeight: '600' },
   input: { borderRadius: 12, padding: SPACING.md, fontSize: 16, borderWidth: 1, marginBottom: SPACING.md },
-  errorText: { color: '#FF3B30', marginBottom: SPACING.md, fontSize: 14, fontWeight: '500' },
+  errorText: { marginBottom: SPACING.md, fontSize: 14, fontWeight: '500' },
   footer: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.sm },
   cancelBtn: { flex: 1, padding: SPACING.md, alignItems: 'center', justifyContent: 'center', borderRadius: 12, borderWidth: 1 },
   cancelText: { fontWeight: 'bold' },
   submitBtn: { flex: 2, padding: SPACING.md, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
-  submitText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 }
+  submitText: { fontWeight: 'bold', fontSize: 16 }
 });
 
 export default AddAccountModal;

@@ -1,26 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Linking, Platform, ToastAndroid, Alert, ScrollView } from 'react-native';
-import { Heart, Mail, Database } from 'lucide-react-native';
-import { SPACING , COLORS} from '../styles/theme';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Linking, ToastAndroid, Alert, ScrollView } from 'react-native';
+import { Heart, Mail, Database, Check } from 'lucide-react-native';
+import { SPACING } from '../styles/theme';
 import { useTheme } from '../context/ThemeContext';
+import { THEMES } from '../styles/theme'; // Reading themes directly from source of truth
 import { clearApiCache } from '../utils/storage';
 
-const THEME_OPTIONS = [
-  '#FF453A', '#0A84FF', '#30D158', '#FF9F0A', '#a270ff', '#8E8E93'
-];
-
 const SettingsScreen = () => {
-  const { themeColor, changeThemeColor, isDark, toggleDarkMode, colors } = useTheme();
+  const { themeName, changeTheme, isDark, toggleDarkMode, colors } = useTheme();
   const upiUrl = "upi://pay?pa=arubk744-6@oksbi&pn=Aryan%20Sharma&aid=uGICAgICgpa-8Sg";
 
   const handleClearCache = async () => {
     const success = await clearApiCache();
-    if (success) {
-      if (Platform.OS === 'android') {
-        ToastAndroid.show("Server cache cleared successfully", ToastAndroid.SHORT);
-      } else {
-        Alert.alert("Success", "Server cache cleared successfully.");
-      }
+    if (success) {    
+      Alert.alert("Success", "Server cache cleared successfully.");      
     } else {
       Alert.alert("Error", "Failed to clear cache.");
     }
@@ -28,13 +21,13 @@ const SettingsScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <Text style={[styles.title, { color: colors.text }]}>Settings</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         
-        {/* Theme Selector */}
+        {/* Appearance Configuration Card */}
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Appearance</Text>
           
@@ -54,44 +47,68 @@ const SettingsScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Square Color Cards */}
-          <View style={styles.colorGrid}>
-            {THEME_OPTIONS.map(color => (
-              <TouchableOpacity
-                key={color}
-                onPress={() => changeThemeColor(color)}
-                style={[
-                  styles.colorSquare,
-                  { backgroundColor: color },
-                  themeColor === color && { borderWidth: 3, borderColor: colors.text }
-                ]}
-              />
-            ))}
+          <Text style={[styles.subLabel, { color: colors.textSecondary }]}>Theme Preset</Text>
+          
+          {/* Dynamic Grid Layout reading from THEMES source object */}
+          <View style={styles.themeGrid}>
+            {Object.keys(THEMES).map((key) => {
+              const theme = THEMES[key];
+              const isSelected = themeName === key;
+              
+              return (
+                <TouchableOpacity
+                  key={key}
+                  onPress={() => changeTheme(key)}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.themeCard,
+                    { backgroundColor: colors.background, borderColor: colors.border },
+                    isSelected && { borderColor: colors.primary, borderWidth: 2 }
+                  ]}
+                >
+                  {/* Custom Split Pill Container Shape: { Light Color | Dark Color } */}
+                  <View style={styles.splitIndicator}>
+                    <View style={[styles.splitHalfLeft, { backgroundColor: theme.light.primary }]} />
+                    <View style={[styles.splitHalfRight, { backgroundColor: theme.dark.primary }]} />
+                    
+                    {/* Centered Check Badge Layer when chosen */}
+                    {isSelected && (
+                      <View style={[styles.checkCircle, { backgroundColor: colors.text }]}>
+                        <Check color={colors.background} size={10} strokeWidth={4} />
+                      </View>
+                    )}
+                  </View>
+                  
+                  {/* Theme Identification Typography */}
+                  <Text style={[styles.themeLabelText, { color: isSelected ? colors.primary : colors.text }]}>
+                    {theme.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
         {/* Donation Card */}
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.cardHeader}>
-            <Heart color={themeColor} size={20} />
-            <Text style={[styles.cardTitle, { color: themeColor, marginBottom: 0 }]}>Support the Project</Text>
+            <Heart color={colors.primary} size={20} />
+            <Text style={[styles.cardTitle, { color: colors.primary, marginBottom: 0 }]}>Support the Project</Text>
           </View>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
             If you find this app helpful, consider making a small donation to keep the servers running!
           </Text>
 
-          {(Platform.OS === 'android' || Platform.OS === 'ios') && (
-            <TouchableOpacity style={[styles.donateBtn, { backgroundColor: themeColor }]} onPress={() => Linking.openURL(upiUrl)}>
-              <Text style={styles.donateBtnText}>Donate via UPI App</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={[styles.donateBtn, { backgroundColor: colors.primary }]} onPress={() => Linking.openURL(upiUrl)}>
+            <Text style={[styles.donateBtnText, { color: colors.background }]}>Donate via UPI App</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Debug Card */}
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.cardHeader}>
             <Database color={colors.textSecondary} size={20} />
-            <Text style={[styles.cardTitle, { color: colors.text, marginBottom: 0 }]}>Developer</Text>
+            <Text style={[styles.cardTitle, { color: colors.text, marginBottom: 0 }]}>Developer Settings</Text>
           </View>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
             Experiencing data sync issues? Clear the local API cache to force a fresh pull from the server.
@@ -104,7 +121,7 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Support Email */}
+        {/* Support Link */}
         <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL('mailto:arubk744@gmail.com')}>
           <Mail color={colors.textSecondary} size={16} />
           <Text style={[styles.emailText, { color: colors.textSecondary }]}>Need help? arubk744@gmail.com</Text>
@@ -117,25 +134,37 @@ const SettingsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { padding: SPACING.md, paddingTop: SPACING.lg ,backgroundColor: COLORS.surface },
+  header: { padding: SPACING.md, paddingTop: SPACING.lg, borderBottomWidth: 1 },
   title: { fontSize: 28, fontWeight: 'bold' },
-  content: { padding: SPACING.md, paddingBottom: SPACING.xl * 2 }, // Added extra bottom padding for safety
+  content: { padding: SPACING.md, paddingBottom: SPACING.xl * 2 },
   
   card: { borderRadius: 16, padding: SPACING.lg, borderWidth: 1, marginBottom: SPACING.md },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: SPACING.sm },
   cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: SPACING.md },
   
-  tabContainer: { flexDirection: 'row', padding: 4, borderRadius: 12, borderWidth: 1, marginBottom: SPACING.lg },
+  tabContainer: { flexDirection: 'row', padding: 4, borderRadius: 12, borderWidth: 1, marginBottom: SPACING.md },
   tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8 },
-  activeTab: { elevation: 2, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  activeTab: { shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
   tabText: { fontWeight: '600', fontSize: 14 },
 
-  colorGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
-  colorSquare: { width: 48, height: 48, borderRadius: 12, elevation: 2 },
+  subLabel: { fontSize: 13, fontWeight: '600', marginBottom: SPACING.md, letterSpacing: 0.5 },
+  
+  // Renders theme choices side-by-side inside a modular wrap-grid layout
+  themeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
+  themeCard: { width: '31%', padding: SPACING.sm, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  
+  // Shape Layout: { Light Color | Dark Color } Dynamic Preview Pill
+  splitIndicator: { width: '100%', height: 32, borderRadius: 6, flexDirection: 'row', overflow: 'hidden', marginBottom: 8, position: 'relative' },
+  splitHalfLeft: { flex: 1 },
+  splitHalfRight: { flex: 1 },
+  
+  // Precise floating absolute layer layout for verification indicator check circles
+  checkCircle: { position: 'absolute', width: 16, height: 16, borderRadius: 8, top: 8, left: '50%', marginLeft: -8, justifyContent: 'center', alignItems: 'center', elevation: 2 },
+  themeLabelText: { fontSize: 12, fontWeight: '700', textAlign: 'center' },
 
   description: { fontSize: 14, lineHeight: 20, marginBottom: SPACING.lg },
   donateBtn: { paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
-  donateBtnText: { color: '#000', fontWeight: 'bold', fontSize: 16 },
+  donateBtnText: { fontWeight: 'bold', fontSize: 16 },
 
   debugBtn: { paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1 },
   debugBtnText: { fontWeight: 'bold', fontSize: 15 },

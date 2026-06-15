@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Smart Meter",
-    "slug": "smart-meter",
+    "name": "PowerTrack",
+    "slug": "powertrack",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0b1013"
+      "backgroundColor": "#181e19"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -18,7 +18,7 @@
       "package": "com.aryn117.smartmeter",
       "adaptiveIcon": {
         "foregroundImage": "./assets/transparent-icon.png",
-        "backgroundColor": "#0b1013"
+        "backgroundColor": "#181e19"
       },
       "edgeToEdgeEnabled": true,
       "permissions": [],

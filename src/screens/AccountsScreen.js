@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { Trash2, Plus } from 'lucide-react-native';
+import { Trash2, Plus, AlertCircle } from 'lucide-react-native';
 import { useAccounts } from '../context/AccountsContext';
 import { useTheme } from '../context/ThemeContext';
-import { COLORS, SPACING } from '../styles/theme';
+import { SPACING } from '../styles/theme';
 import AddAccountModal from '../components/Modals/AddAccountModal';
 
 // Premium UI colors for deterministic offline backgrounds
@@ -19,7 +19,7 @@ const AVATAR_COLORS = [
 
 const AccountsScreen = () => {
   const { accounts, currentlySelectedAccount, setCurrentlySelectedAccount, deleteAccount } = useAccounts();
-  const { themeColor, colors } = useTheme();
+  const { colors } = useTheme(); // Relying purely on the structured palette colors
   const [isModalVisible, setModalVisible] = useState(false);
 
   // Generates a stable character and color entirely offline from the string name
@@ -55,14 +55,18 @@ const AccountsScreen = () => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Your Accounts</Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={[styles.addBtn, { backgroundColor: themeColor }]}>
-          <Plus color="#000" size={18} />
-          <Text style={styles.addBtnText}>Add New</Text>
+        <TouchableOpacity 
+          onPress={() => setModalVisible(true)} 
+          style={[styles.addBtn, { backgroundColor: colors.primary }]}
+        >
+          <Plus color={colors.background} size={18} strokeWidth={2.5} />
+          <Text style={[styles.addBtnText, { color: colors.background }]}>Add New</Text>
         </TouchableOpacity>
       </View>
 
       {accounts.length === 0 ? (
         <View style={styles.emptyContainer}>
+          <AlertCircle color={colors.textSecondary} size={40} style={{ marginBottom: SPACING.sm }} />
           <Text style={[styles.emptyText, { color: colors.text }]}>No accounts added yet.</Text>
           <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>Tap "Add New" to get started.</Text>
         </View>
@@ -78,7 +82,7 @@ const AccountsScreen = () => {
                 style={[
                   styles.accountCard, 
                   { backgroundColor: colors.surface, borderColor: colors.border },
-                  isSelected && { backgroundColor: `${themeColor}15`, borderColor: themeColor }
+                  isSelected && { backgroundColor: `${colors.primary}15`, borderColor: colors.primary }
                 ]}
                 onPress={() => setCurrentlySelectedAccount(account)}
                 activeOpacity={0.7}
@@ -89,12 +93,16 @@ const AccountsScreen = () => {
                 </View>
 
                 <View style={styles.accountInfo}>
-                  <Text style={[styles.accountName, { color: isSelected ? themeColor : colors.text }]}>{account.name}</Text>
-                  <Text style={[styles.accountNumber, { color: colors.textSecondary }]}>{account.accountNumber}</Text>
+                  <Text style={[styles.accountName, { color: isSelected ? colors.primary : colors.text }]}>
+                    {account.name}
+                  </Text>
+                  <Text style={[styles.accountNumber, { color: colors.textSecondary }]}>
+                    {account.accountNumber}
+                  </Text>
                 </View>
                 
                 <TouchableOpacity
-                  style={[styles.deleteBtn, { backgroundColor: 'rgba(255, 69, 58, 0.1)' }]}
+                  style={[styles.deleteBtn, { backgroundColor: `${colors.error}15` }]}
                   onPress={() => confirmDelete(account.accountNumber)}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
@@ -113,10 +121,10 @@ const AccountsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {backgroundColor: COLORS.surface, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: SPACING.md, paddingTop: SPACING.lg },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: SPACING.md, paddingTop: SPACING.lg },
   title: { fontSize: 28, fontWeight: 'bold' },
   addBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, gap: 6 },
-  addBtnText: { color: '#000', fontWeight: 'bold', fontSize: 14 },
+  addBtnText: { fontWeight: 'bold', fontSize: 14 },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.lg },
   emptyText: { fontSize: 18, fontWeight: '600', marginBottom: 8 },
   emptySubtext: { fontSize: 14 },
@@ -124,9 +132,9 @@ const styles = StyleSheet.create({
   
   accountCard: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md, borderRadius: 16, marginBottom: SPACING.sm, borderWidth: 1 },
   
-  // Offline Avatar Styles
-  avatarContainer: { width: 44, height: 44, borderRadius: 6, marginRight: SPACING.md, justifyContent: 'center', alignItems: 'center', textAlign: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 1 },
-  avatarLetter: { color: '#FFFFFF', fontSize: 24, fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' },
+  // Custom Technical Style Offline Avatars
+  avatarContainer: { width: 44, height: 44, borderRadius: 44, marginRight: SPACING.md, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 1 },
+  avatarLetter: { color: '#FFFFFF', fontSize: 22, fontWeight: 'bold', textAlign: 'center' },
   
   accountInfo: { flex: 1 },
   accountName: { fontSize: 16, fontWeight: 'bold', marginBottom: 4 },

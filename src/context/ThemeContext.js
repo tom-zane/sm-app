@@ -2,60 +2,68 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useColorScheme } from 'react-native';
 import { getData, saveData } from '../utils/storage';
 
+// Import your modernized central THEMES config matrix
+import { THEMES } from '../styles/theme'; 
+
 const ThemeContext = createContext();
-
-export const lightColors = {
-  background: '#F2F2F7',
-  surface: '#FFFFFF',
-  text: '#000000',
-  textSecondary: '#6C6C70',
-  border: '#E5E5EA',
-  error: '#FF3B30',
-};
-
-export const darkColors = {
-  background: '#121212',
-  surface: '#1C1C1E',
-  text: '#FFFFFF',
-  textSecondary: '#A1A1AA',
-  border: '#38383A',
-  error: '#FF453A',
-};
 
 export const ThemeProvider = ({ children }) => {
   const systemColorScheme = useColorScheme();
-  const [themeColor, setThemeColor] = useState('#a270ff'); 
+  
+  // Track theme configurations by dictionary identifier name
+  const [themeName, setThemeName] = useState('default'); 
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    const loadTheme = async () => {
-      const savedColor = await getData('@app_theme_color');
+    const loadThemeSettings = async () => {
+      const savedThemeName = await getData('@app_theme_name');
       const savedMode = await getData('@app_theme_mode');
       
-      if (savedColor) setThemeColor(savedColor);
+      if (savedThemeName && THEMES[savedThemeName]) {
+        setThemeName(savedThemeName);
+      }
+      
       if (savedMode !== null) {
         setIsDark(savedMode === 'dark');
       } else {
+        // Fall back to system configuration settings if no cache exists
         setIsDark(systemColorScheme === 'dark');
       }
     };
-    loadTheme();
-  }, []);
+    loadThemeSettings();
+  }, [systemColorScheme]);
 
-  const changeThemeColor = async (color) => {
-    setThemeColor(color);
-    await saveData('@app_theme_color', color);
+  // Swaps the active base layout variations (e.g., 'default', 'ocean', etc.)
+  const changeTheme = async (name) => {
+    if (THEMES[name]) {
+      setThemeName(name);
+      await saveData('@app_theme_name', name);
+    }
   };
 
+  // Switches between Dark and Light palettes
   const toggleDarkMode = async (dark) => {
     setIsDark(dark);
     await saveData('@app_theme_mode', dark ? 'dark' : 'light');
   };
 
-  const colors = isDark ? darkColors : lightColors;
+  // Resolve the current active color dictionary map dynamically
+  const targetThemeConfig = THEMES[themeName] || THEMES.default;
+  const colors = isDark ? targetThemeConfig.dark : targetThemeConfig.light;
 
   return (
-    <ThemeContext.Provider value={{ themeColor, changeThemeColor, isDark, toggleDarkMode, colors }}>
+    <ThemeContext.Provider value={{ 
+      themeName, 
+      changeTheme, 
+      isDark, 
+      toggleDarkMode, 
+      colors,
+      
+      // Backward Compatibility Bridge:
+      // Maps themeColor directly into your current theme's primary color 
+      // so your buttons and components won't crash while you refactor them out later.
+      themeColor: colors.primary 
+    }}>
       {children}
     </ThemeContext.Provider>
   );

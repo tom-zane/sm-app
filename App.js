@@ -1,23 +1,28 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
+import React from 'react';
+import { StatusBar } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import RootNavigator from './src/navigation/RootNavigator'; // Path to your RootNavigator file
 
-import RootNavigator from "./src/navigation/RootNavigator";
-import { COLORS } from "./src/styles/theme";
-import { ThemeProvider } from "./src/context/ThemeContext";
+function AppContent() {
+  const { isDark, colors } = useTheme();
+
+  return (
+    <NavigationContainer>
+      <StatusBar 
+        barStyle={isDark ? 'light-content' : 'dark-content'} 
+        backgroundColor={colors.background} 
+      />
+      {/* Renders the navigation architecture instead of a single screen */}
+      <RootNavigator />
+    </NavigationContainer>
+  );
+}
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.surface }} edges={["top"]}>
-          <NavigationContainer>
-            <StatusBar style="light" backgroundColor={COLORS.surface} />
-            <RootNavigator />
-          </NavigationContainer>
-        </SafeAreaView>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

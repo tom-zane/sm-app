@@ -10,7 +10,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 const Tab = createBottomTabNavigator();
 
 const AppNavigator = () => {
-  const { colors, themeColor } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <Tab.Navigator
@@ -19,32 +19,42 @@ const AppNavigator = () => {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          height: 60,
-          paddingBottom: 8,
+          height: 64,
+          paddingBottom: 10,
+          paddingTop: 6,
+          elevation: 0, 
+          borderTopWidth: 1,
         },
-        tabBarActiveTintColor: themeColor,
+        tabBarActiveTintColor: colors.primary, 
         tabBarInactiveTintColor: colors.textSecondary,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       }}
     >
       <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size - 2} />,
         }}
       />
       <Tab.Screen
         name="Accounts"
         component={AccountsScreen}
         options={{
-          tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+          tabBarLabel: 'Accounts',
+          tabBarIcon: ({ color, size }) => <Users color={color} size={size - 2} />,
         }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ color, size }) => <SettingsIcon color={color} size={size} />,
+          tabBarLabel: 'Settings',
+          tabBarIcon: ({ color, size }) => <SettingsIcon color={color} size={size - 2} />,
         }}
       />
     </Tab.Navigator>
