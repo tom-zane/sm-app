@@ -5,8 +5,6 @@ import { SPACING } from '../../styles/theme';
 import { useAccounts } from '../../context/AccountsContext';
 import { useTheme } from '../../context/ThemeContext';
 import * as Haptics from 'expo-haptics';
-
-// 1. IMPORT THE SINGLE SOURCE OF TRUTH
 import { fetchMeterData } from '../../utils/api';
 
 const AddAccountModal = ({ visible, onClose }) => {
@@ -35,16 +33,15 @@ const AddAccountModal = ({ visible, onClose }) => {
     }
 
     try {
-      // 2. USE THE API FUNCTION (This checks validity AND pre-warms the cache!)
       const data = await fetchMeterData(customerId, true);
 
-      if (!data.isCustomerIdValid) {
-        throw new Error("Invalid Customer ID.");
+      if (!data || !data.isCustomerIdValid) {
+        throw new Error("Your CustomerID is Wrong, Please Check Again!");
       }
 
       const success = await addAccount(customerId, customerName);
       if (!success) {
-        throw new Error("Account already exists.");
+        throw new Error("Account already exists within local storage.");
       }
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -52,8 +49,8 @@ const AddAccountModal = ({ visible, onClose }) => {
       setCustomerId("");
       onClose();
     } catch (err) {
-      // api.js throws clean error messages directly from your Cloudflare worker
-      setError(err.message || "An error occurred.");
+      // Displays clean message strings from the worker context rather than a data object dump
+      setError(err.message || "Unable to communicate with verification servers.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);

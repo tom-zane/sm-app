@@ -1,6 +1,5 @@
 import { getData, saveData } from './storage';
 
-// Your new modernized worker deployment URL
 const API_BASE_URL = 'https://jpdcl-meter-api.aryanue195035ece.workers.dev';
 const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 
@@ -24,21 +23,20 @@ export const fetchMeterData = async (accountNumber, forceRefresh = false) => {
       }
     }
 
+    // 2. Fetch fresh profile details
     const response = await fetch(`${API_BASE_URL}/getcustomerinfo?consumerCode=${accountNumber}`);
     const responseText = await response.text();
 
-    // Parse the JSON immediately so we can inspect its contents even on non-200 statuses
     let data;
-    try {j
+    try {
+      // FIXED: Removed the stray 'j' character
       data = JSON.parse(responseText);
     } catch (parseError) {
       console.error("[API] JSON parse error:", parseError);
-      console.error("[API] Failed to parse response as JSON. Response was:", responseText);
-      throw new Error(`JSON Parse Error: ${parseError.message}. Response: ${responseText}`);
+      throw new Error("Failed to process the server response format.");
     }
     
     if (!response.ok) {
-      // Pulls the explicit error message parsed by the worker (e.g., "Your CustomerID is Wrong...")
       console.error("[API] Response not ok, error:", data.error);
       throw new Error(data.error || "Failed to fetch data from the server.");
     }
@@ -49,9 +47,7 @@ export const fetchMeterData = async (accountNumber, forceRefresh = false) => {
 
     return data;
   } catch (error) {
-    console.error("[API Error] Full error object:", error);
-    console.error("[API Error] Error message:", error.message);
-    console.error("[API Error] Error stack:", error.stack);
+    console.error("[API Error]:", error.message);
     throw error;
   }
 };

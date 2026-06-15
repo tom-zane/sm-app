@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Linking, Platform, ToastAndroid, Alert, ScrollView } from 'react-native';
 import { Heart, Mail, Database } from 'lucide-react-native';
-import { SPACING } from '../styles/theme';
+import { SPACING , COLORS} from '../styles/theme';
 import { useTheme } from '../context/ThemeContext';
 import { clearApiCache } from '../utils/storage';
 
@@ -117,7 +117,7 @@ const SettingsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { padding: SPACING.md, paddingTop: SPACING.lg },
+  header: { padding: SPACING.md, paddingTop: SPACING.lg ,backgroundColor: COLORS.surface },
   title: { fontSize: 28, fontWeight: 'bold' },
   content: { padding: SPACING.md, paddingBottom: SPACING.xl * 2 }, // Added extra bottom padding for safety
   

@@ -24,7 +24,6 @@ export const AccountsProvider = ({ children }) => {
 
   const addAccount = async (accountNumber, name) => {
     if (accountNumber.length !== 13 || accounts.some(acc => acc.accountNumber === accountNumber)) {
-      console.log("Account already exists or invalid customer ID");
       return false; 
     }
     
