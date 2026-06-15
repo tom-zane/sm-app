@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Build outputs
+dist/
+build/
+
+# Expo
+.expo/
+
+# Android
+android/
+
+# Android signing files
+*.keystore
+*.jks
+
+# iOS
+ios/
+DerivedData/
+
+# Optional: Ignore entire native folders if not committing them
+# android/
+# ios/
+
+# Proxy server
+proxy-server/node_modules/
+proxy-server/dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
